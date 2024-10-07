@@ -10,6 +10,8 @@ services:
       - traefik.http.routers.http_svc_router.rule=Host(`http-svc.nith-tech.com`)
       - traefik.http.routers.http_svc_router.entrypoints=httpsep
       - traefik.http.routers.http_svc_router.tls=true
+      - traefik.http.routers.http_svc_router.tls.domains[0].main=nith-tech.com
+      - traefik.http.routers.http_svc_router.tls.domains[0].sans=http-svc.nith-tech.com
       - traefik.http.routers.http_svc_router.tls.certresolver=tlsresolver
       - traefik.http.routers.http_svc_router.service=http_svc
       - traefik.http.services.http_svc.loadbalancer.server.port=9898
@@ -72,6 +74,8 @@ services:
       - traefik.http.routers.proxy_router.entrypoints=httpsep
       - traefik.http.routers.proxy_router.service=api@internal
       - traefik.http.routers.proxy_router.tls=true
+      - traefik.http.routers.proxy_router.tls.domains[0].main=nith-tech.com
+      - traefik.http.routers.proxy_router.tls.domains[0].sans=proxy.nith-tech.com
       - traefik.http.routers.proxy_router.tls.certresolver=tlsresolver
       - traefik.http.routers.proxy_router.middlewares=traefik-auth
       - traefik.http.middlewares.traefik-auth.basicauth.users=xvwSoUqcXHhbNzBcclx1Qq0ihk:EymxBzznix7PpV6FodnPpBjV2xqhyHBEGEm3H
