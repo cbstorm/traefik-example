@@ -7,6 +7,14 @@ services:
     networks:
       - trfnet
     command: ['/bin/http_svc', '-port', '9898', '-s_name', 'http_svc_1']
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.http_svc_router.rule=Host(`http-svc.nith-tech.com`)
+      - traefik.http.routers.http_svc_router.entrypoints=httpsep
+      - traefik.http.routers.http_svc_router.tls=true
+      - traefik.http.routers.http_svc_router.tls.certresolver=tlsresolver
+      - traefik.http.routers.http_svc_router.service=http_svc
+      - traefik.http.services.http_svc.loadbalancer.server.port=9898
   tcp_svc_1:
     container_name: tcp_svc_1
     build: ./tcp_svc
@@ -15,6 +23,14 @@ services:
     networks:
       - trfnet
     command: ['/bin/tcp_svc', '-port', '6868', '-s_name', 'tcp_svc_1']
+    labels:
+      - traefik.enable=true
+      - traefik.tcp.routers.tcp_svc_router.entrypoints=tcpep
+      - traefik.tcp.routers.tcp_svc_router.rule=HostSNI(`tcp-svc.nith-tech.com`)
+      - traefik.tcp.routers.tcp_svc_router.tls=true
+      - traefik.tcp.routers.tcp_svc_router.tls.certresolver=tlsresolver
+      - traefik.tcp.routers.tcp_svc_router.service=tcp_svc
+      - traefik.tcp.services.tcp_svc.loadbalancer.server.port=6868
   udp_svc_1:
     container_name: udp_svc_1
     build: ./udp_svc
@@ -23,6 +39,45 @@ services:
     networks:
       - trfnet
     command: ['/bin/udp_svc', '-port', '5858', '-s_name', 'udp_svc_1']
+    labels:
+      - traefik.enable=true
+      - traefik.udp.routers.udp_svc_router.entrypoints=udpep
+      - traefik.udp.routers.udp_svc_router.service=udp_svc
+      - traefik.udp.services.udp_svc.loadbalancer.server.port=5858
+  proxy:
+    image: traefik:v3.1
+    container_name: proxy
+    command:
+      - '--api.insecure=true'
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--providers.docker.endpoint=unix:///var/run/docker.sock'
+      - '--entryPoints.httpep.address=:80'
+      - '--entryPoints.httpsep.address=:443'
+      - '--entryPoints.tcpep.address=:3179'
+      - '--entryPoints.udpep.address=:1704/udp'
+      - '--certificatesresolvers.tlsresolver.acme.tlschallenge=true'
+      - '--certificatesresolvers.tlsresolver.acme.email=cbstorm.dev@gmail.com'
+      - '--certificatesresolvers.tlsresolver.acme.storage=/letsencrypt/acme.json'
+      - '--certificatesresolvers.tlsresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory'
+      - '--log.level=INFO'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./letsencrypt:/letsencrypt
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    networks:
+      - trfnet
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.proxy_router.rule=Host(`proxy.nith-tech.com`)
+      - traefik.http.routers.proxy_router.entrypoints=httpsep
+      - traefik.http.routers.proxy_router.service=api@internal
+      - traefik.http.routers.proxy_router.tls.certresolver=tlsresolver
+      - traefik.http.routers.proxy_router.middlewares=traefik-auth
+      - traefik.http.middlewares.traefik-auth.basicauth.users=xvwSoUqcXHhbNzBcclx1Qq0ihk:EymxBzznix7PpV6FodnPpBjV2xqhyHBEGEm3H
 networks:
   trfnet:
     driver: bridge
