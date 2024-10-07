@@ -1,0 +1,28 @@
+services:
+  http_svc_1:
+    container_name: http_svc_1
+    build: ./http_svc
+    ports:
+      - 9898:9898
+    networks:
+      - trfnet
+    command: ['/bin/http_svc', '-port', '9898', '-s_name', 'http_svc_1']
+  tcp_svc_1:
+    container_name: tcp_svc_1
+    build: ./tcp_svc
+    ports:
+      - 6868:6868
+    networks:
+      - trfnet
+    command: ['/bin/tcp_svc', '-port', '6868', '-s_name', 'tcp_svc_1']
+  udp_svc_1:
+    container_name: udp_svc_1
+    build: ./udp_svc
+    ports:
+      - 5858:5858/udp
+    networks:
+      - trfnet
+    command: ['/bin/udp_svc', '-port', '5858', '-s_name', 'udp_svc_1']
+networks:
+  trfnet:
+    driver: bridge
