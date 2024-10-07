@@ -2,8 +2,6 @@ services:
   http_svc_1:
     container_name: http_svc_1
     build: ./http_svc
-    ports:
-      - 9898:9898
     networks:
       - trfnet
     command: ['/bin/http_svc', '-port', '9898', '-s_name', 'http_svc_1']
@@ -18,8 +16,6 @@ services:
   tcp_svc_1:
     container_name: tcp_svc_1
     build: ./tcp_svc
-    ports:
-      - 6868:6868
     networks:
       - trfnet
     command: ['/bin/tcp_svc', '-port', '6868', '-s_name', 'tcp_svc_1']
@@ -75,9 +71,9 @@ services:
       - traefik.http.routers.proxy_router.rule=Host(`proxy.nith-tech.com`)
       - traefik.http.routers.proxy_router.entrypoints=httpsep
       - traefik.http.routers.proxy_router.service=api@internal
+      - traefik.http.routers.proxy_router.tls=true
       - traefik.http.routers.proxy_router.tls.certresolver=tlsresolver
       - traefik.http.routers.proxy_router.middlewares=traefik-auth
-      - traefik.http.services.api@internal.loadbalancer.server.port=8080
       - traefik.http.middlewares.traefik-auth.basicauth.users=xvwSoUqcXHhbNzBcclx1Qq0ihk:EymxBzznix7PpV6FodnPpBjV2xqhyHBEGEm3H
 networks:
   trfnet:
