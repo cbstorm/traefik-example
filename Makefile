@@ -20,3 +20,5 @@ udp:
 	./client/client -port 5858
 ludp:
 	go run ./udp_svc/main.go -port 5858 -s_name udp1
+passwd:
+	@echo $(shell htpasswd -nB user) | sed -e s/\\$/\\$\\$/g
